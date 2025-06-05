@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คุณเสือกแค่ไหน? - ควิซวัดระดับความเสือกของคุณ</title>
+    <meta name="author" content="PetchMANNO1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .result-emoji {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Custom checkbox */
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .custom-checkbox.checked {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white">
+    
+    
+    <!-- Homepage -->
+    <div id="homepage" class="container mx-auto px-4 py-10">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">คุณขี้เสือกแค่ไหน?</h1>
+            <p class="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+                มึงว่ามึงเป็นคนประเภทไหนในการ "เสือก" เรื่องคนอื่น? แต่เอาจริงๆนะมึงเข้าเว็ปมาก็เสือกละ 
+      มาเช็กกันเลยว่าความเสือกของคุณอยู่ในระดับไหน!
+            </p>
+            <div class="relative group">
+                <button id="startQuiz" class="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-full text-lg transform transition-all duration-300 group-hover:scale-105 shadow-lg">
+                    เริ่มเสือก <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <div class="absolute -bottom-2 left-0 right-0 h-2 bg-pink-200 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+        </div>
+        
+        <div class="mt-16 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-pink-500 text-3xl mb-3"><i class="fas fa-question-circle"></i></div>
+                <h3 class="font-bold text-gray-800">5-10 คำถาม</h3>
+                <p class="text-sm text-gray-600">คำถามชวนคิดเกี่ยวกับสถานการณ์ต่าง ๆ</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-pink-500 text-3xl mb-3"><i class="fas fa-laugh-beam"></i></div>
+                <h3 class="font-bold text-gray-800">ผลลัพธ์สดใส</h3>
+                <p class="text-sm text-gray-600">วิเคราะห์ระดับความเสือกของคุณ</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow md:col-span-1 col-span-2">
+                <div class="text-pink-500 text-3xl mb-3"><i class="fas fa-share-alt"></i></div>
+                <h3 class="font-bold text-gray-800">แชร์ผลลัพธ์</h3>
+                <p class="text-sm text-gray-600">โชว์ผลลัพธ์ให้เพื่อน ๆ รู้กันไปเลย!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Container (hidden initially) -->
+    <div id="quizContainer" class="hidden container mx-auto px-4 py-10 max-w-3xl">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-pink-600 font-medium" id="progressText">คำถามที่ 1/8</span>
+                <span class="text-gray-500" id="timer"></span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progressBar" class="progress-bar bg-black h-3 rounded-full" style="width: 12.5%"></div>
+            </div>
+        </div>
+        
+        <!-- Question Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 id="questionText" class="text-2xl font-bold text-gray-800 mb-6"></h2>
+            
+            <!-- Options Container -->
+            <div id="optionsContainer" class="space-y-4">
+                <!-- Options will be inserted here by JavaScript -->
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between mt-8">
+                <button id="prevBtn" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-lg transition">
+                    <i class="fas fa-arrow-left mr-2"></i> ย้อนกลับ
+                </button>
+                <button id="nextBtn" class="ml-auto bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    ต่อไป <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quiz Tips -->
+        <div class="bg-pink-50 border border-pink-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <div class="text-pink-500 mr-3 mt-1"><i class="fas fa-lightbulb"></i></div>
+                <div>
+                    <h3 class="font-bold text-pink-600 mb-1">เคล็ดลับการทำแบบทดสอบ</h3>
+                    <p class="text-sm text-gray-700">ตอบตามความรู้สึกแรกที่คุณคิดถึง อย่าคิดเยอะ! เพื่อผลลัพธ์ที่ตรงกับตัวคุณมากที่สุด</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Container (hidden initially) -->
+    <div id="resultsContainer" class="hidden container mx-auto px-4 py-12 max-w-2xl">
+        <div class="text-center">
+            <div class="result-emoji text-8xl mb-6" id="resultEmoji">🤔</div>
+            <h1 id="resultTitle" class="text-3xl md:text-4xl font-bold text-black mb-4"></h1>
+            <div id="resultPercentage" class="text-5xl font-bold text-gray-800 mb-6"></div>
+            <div id="resultDescription" class="text-lg text-gray-700 mb-8 leading-relaxed"></div>
+            
+            <!-- Share Buttons -->
+            <div class="flex justify-center space-x-4 mb-10">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition">
+                    <i class="fab fa-facebook-f mr-2"></i> Facebook
+                </button>
+                <button class="bg-emerald-500 hover:bg-emerald-600 text-white py-2 px-4 rounded-lg transition">
+                    <i class="fab fa-line mr-2"></i> Line
+                </button>
+                <button class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition">
+                    <i class="fas fa-link mr-2"></i> คัดลอกลิงค์
+                </button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                <h3 class="font-bold text-gray-800 text-xl mb-4">รายละเอียดผลลัพธ์ของคุณ</h3>
+                <div id="resultBreakdown" class="text-left space-y-4">
+                    <!-- Result breakdown will be inserted here -->
+                </div>
+            </div>
+            
+            <button id="retakeQuiz" class="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-6 rounded-lg transition">
+                <i class="fas fa-redo mr-2"></i> ทำแบบทดสอบอีกครั้ง
+            </button>
+            
+            <div class="mt-12 text-center text-gray-500 text-sm">
+                <p>ร่วมสนุกและแชร์ประสบการณ์ของคุณกับเพื่อน ๆ</p>
+                <p class="mt-2">#คุณเสือกแค่ไหน</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = [
+            {
+                question: "เมื่อเห็นกลุ่มเพื่อนนั่งกระซิบกัน คุณจะ...",
+                options: [
+                    { text: "เดินผ่านเฉย ๆ ไม่สนใจ", score: 1 },
+                    { text: "พยายามเดินใกล้ ๆ เพื่อฟังให้ได้ยิน", score: 2 },
+                    { text: "เดินตรงเข้าไปถามว่า 'คุยอะไรกันเหรอ?'", score: 3 },
+                    { text: "ส่งสายตาไปที่เพื่อนอีกกลุ่มเพื่อถามว่า 'มันพูดอะไร?'", score: 4 }
+                ]
+            },
+            {
+                question: "หากพบโทรศัพท์เพื่อนปลดล็อคอยู่ คุณจะ...",
+                options: [
+                    { text: "ไม่แตะต้อง เพราะเป็นของส่วนตัว", score: 1 },
+                    { text: "เดี๋ยวเดียวเขาก็มา คงไม่เปิดดู", score: 2 },
+                    { text: "แค่ดูเวลา ส่องหน้าจอคร่าว ๆ", score: 3 },
+                    { text: "รีบขอดูแชทกับแฟนว่าเขาคุยอะไรกัน", score: 4 }
+                ]
+            },
+            {
+                question: "เมื่อเพื่อนบอกว่า 'เดี๋ยวฉันจะบอกเรื่องสำคัญ' คุณจะ...",
+                options: [
+                    { text: "รอให้เขาเล่าเมื่อพร้อม", score: 1 },
+                    { text: "ถามเบา ๆ ว่า 'เกิดอะไรขึ้นหรือเปล่า?'", score: 2 },
+                    { text: "ลองเดาไปเรื่อย ๆ จนกว่าเขาจะบอก", score: 3 },
+                    { text: "ตามตื้อจนกว่าเขาจะยอมบอก", score: 4 }
+                ]
+            },
+            {
+                question: "หากเห็นเพื่อนคุยโทรศัพท์ด้วยน้ำเสียงเคร่งเครียด คุณจะ...",
+                options: [
+                    { text: "นั่งรอจนกว่าเขาจะคุยเสร็จ", score: 1 },
+                    { text: "แค่สังเกตสีหน้าเมื่อคุยเสร็จ", score: 2 },
+                    { text: "พยายามฟังแค่บางประโยค", score: 3 },
+                    { text: "ตั้งใจฟังทั้งบทสนทนา และทำเป็นเดินผ่านไปมา", score: 4 }
+                ]
+            },
+            {
+                question: "ใน group chat เพื่อนพูดว่า 'ใครบางคนในนี้นะ...' คุณจะ...",
+                options: [
+                    { text: "ไม่สงสัยอะไร รอให้เขาเล่าต่อ", score: 1 },
+                    { text: "แค่คิดในใจว่า น่าจะหมายถึงใคร", score: 2 },
+                    { text: "ถามว่า 'เอ...หมายถึงใครเหรอ?'", score: 3 },
+                    { text: "แท็กเพื่อนทุกคนทีละคนเพื่อหาคำตอบ", score: 4 }
+                ]
+            },
+            {
+                question: "เมื่อรู้ข่าวเพื่อนกำลังมีความรัก แต่เขายังไม่เล่าให้ฟัง คุณจะ...",
+                options: [
+                    { text: "รอให้เขาเล่าเมื่อพร้อม", score: 1 },
+                    { text: "แอบสังเกตพฤติกรรมเขาเท่านั้น", score: 2 },
+                    { text: "ถามคนรอบตัวว่าเขาคบกับใคร", score: 3 },
+                    { text: "ตามสืบจนพบและไปทักเขาเลยว่า 'คบกับ...ใช่ไหม?'", score: 4 }
+                ]
+            }
+        ];
+
+        // Results data
+        const resultData = [
+            {
+                title: "คุณคือ 'ผ้าใบขาวแห่งความเมคเซ็นส์'",
+                emoji: "😇",
+                description: "คุณแทบจะไม่สนใจเรื่องคนอื่นเลย เรียกได้ว่าเป็นคนที่น่ารักและให้เกียรติความเป็นส่วนตัวสุด ๆ แต่บางทีเพื่อน ๆ อาจอยากให้คุณสนใจพวกเขาบ้างก็ได้นะ!",
+                minScore: 6,
+                maxScore: 10
+            },
+            {
+                title: "คุณคือ 'นักสังเกตการณ์ผู้สงบนิ่ง'",
+                emoji: "🧐",
+                description: "คุณมีความสนใจเรื่องคนอื่นในระดับพอดี ๆ ไม่ถึงกับเสือก แต่ก็ไม่เฉยเมยเกินไป คุณรู้จักกาลเทศะและมักจะเป็นคนที่เพื่อนไว้ใจให้รับรู้ความลับ",
+                minScore: 11,
+                maxScore: 16
+            },
+            {
+                title: "คุณคือ 'เสือกมือสมัครเล่นแต่กำลังพัฒนา'",
+                emoji: "🕵️‍♂️",
+                description: "ความอยากรู้อยากเห็นของคุณอยู่ในระดับปานกลางค่อนไปทางสูง คุณพยายามควบคุมตัวเอง แต่บางครั้งความเสือกก็พุ่งพล่านจนยากจะหักห้ามใจ!",
+                minScore: 17,
+                maxScore: 21
+            },
+            {
+                title: "คุณคือ 'ราชา/ราชินีแห่งความเสือก'",
+                emoji: "👑",
+                description: "คุณไม่สามารถอยู่เฉยได้เมื่อมีเรื่องน่าสนใจเกิดขึ้นรอบตัว! ความเสือกของคุณอยู่ในระดับมืออาชีพ เพื่อน ๆ ถึงกับตั้งฉายาให้ว่า 'นักสืบจอมจุ้น' แน่นอนว่าคุณรู้ทุกเรื่อง...ก่อนคนอื่นจะเล่าเสียอีก!",
+                minScore: 22,
+                maxScore: 24
+            }
+        ];
+
+        // DOM elements
+        const homepage = document.getElementById('homepage');
+        const quizContainer = document.getElementById('quizContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const startQuizBtn = document.getElementById('startQuiz');
+        const retakeQuizBtn = document.getElementById('retakeQuiz');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultEmoji = document.getElementById('resultEmoji');
+        const resultDescription = document.getElementById('resultDescription');
+        const resultPercentage = document.getElementById('resultPercentage');
+        const resultBreakdown = document.getElementById('resultBreakdown');
+        const timer = document.getElementById('timer');
+
+        // Quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+        let quizStartTime;
+        let timerInterval;
+
+        // Start quiz button click handler
+        startQuizBtn.addEventListener('click', () => {
+            homepage.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            startQuiz();
+            startTimer();
+        });
+
+        // Retake quiz button click handler
+        retakeQuizBtn.addEventListener('click', () => {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            currentQuestion = 0;
+            score = 0;
+            answers = [];
+            startQuiz();
+            startTimer();
+        });
+
+        // Next button click handler
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        // Previous button click handler
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        });
+
+        // Start the quiz
+        function startQuiz() {
+            quizStartTime = new Date();
+            showQuestion();
+        }
+
+        // Show current question
+        function showQuestion() {
+            const question = quizData[currentQuestion];
+            questionText.textContent = question.question;
+            
+            // Update progress
+            progressText.textContent = `คำถามที่ ${currentQuestion + 1}/${quizData.length}`;
+            const progressPercent = ((currentQuestion + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            
+            // Toggle previous button
+            if (currentQuestion > 0) {
+                prevBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+            }
+            
+            // Update next button text for last question
+            if (currentQuestion === quizData.length - 1) {
+                nextBtn.textContent = 'ดูผลลัพธ์ ' + nextBtn.innerHTML.split('ดูผลลัพธ์')[1];
+            } else {
+                nextBtn.innerHTML = 'ต่อไป <i class="fas fa-arrow-right ml-2"></i>';
+            }
+            
+            // Disable next button until an option is selected
+            nextBtn.disabled = true;
+            
+            // Clear options container
+            optionsContainer.innerHTML = '';
+            
+            // Add options to the container
+            question.options.forEach((option, index) => {
+                const isSelected = answers[currentQuestion] === index;
+                
+                const optionElement = document.createElement('div');
+                optionElement.className = `option-card flex items-center bg-white p-4 rounded-lg border ${isSelected ? 'border-black bg-gray-100' : 'border-gray-200'} cursor-pointer transition-all duration-300`;
+                optionElement.innerHTML = `
+                    <div class="custom-checkbox mr-4 ${isSelected ? 'checked' : ''}">
+                        ${isSelected ? '<i class="fas fa-check text-xs"></i>' : ''}
+                    </div>
+                    <span class="text-gray-800">${option.text}</span>
+                `;
+                
+                optionElement.addEventListener('click', () => {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.option-card').forEach(el => {
+                        el.classList.remove('border-pink-500', 'bg-pink-50');
+                        el.querySelector('.custom-checkbox').classList.remove('checked');
+                        el.querySelector('.custom-checkbox').innerHTML = '';
+                    });
+                    
+                    // Add selected class to clicked option
+                    optionElement.classList.add('border-pink-500', 'bg-pink-50');
+                    optionElement.querySelector('.custom-checkbox').classList.add('checked');
+                    optionElement.querySelector('.custom-checkbox').innerHTML = '<i class="fas fa-check text-xs"></i>';
+                    
+                    // Store the answer
+                    answers[currentQuestion] = index;
+                    
+                    // Enable next button
+                    nextBtn.disabled = false;
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Show results
+        function showResults() {
+            clearInterval(timerInterval);
+            
+            // Calculate score
+            score = 0;
+            answers.forEach((answerIndex, questionIndex) => {
+                if (answerIndex !== undefined) {
+                    score += quizData[questionIndex].options[answerIndex].score;
+                }
+            });
+            
+            // Calculate max possible score
+            const maxScore = quizData.reduce((total, question) => {
+                return total + Math.max(...question.options.map(o => o.score));
+            }, 0);
+            
+            // Calculate percentage
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            // Find the appropriate result
+            let result;
+            for (let r of resultData) {
+                if (score >= r.minScore && score <= r.maxScore) {
+                    result = r;
+                    break;
+                }
+            }
+            
+            // Update result elements
+            resultTitle.textContent = result.title;
+            resultEmoji.textContent = result.emoji;
+            resultDescription.textContent = result.description;
+            resultPercentage.textContent = `${percentage}% เสือก`;
+            
+            // Show breakdown
+            resultBreakdown.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="font-medium">คะแนนความเสือกรวม</span>
+                    <span class="font-bold text-pink-600">${score} / ${maxScore}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-medium">จำนวนคำถาม</span>
+                    <span>${quizData.length}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-medium">เวลาที่ใช้ทำแบบทดสอบ</span>
+                    <span id="timeSpent"></span>
+                </div>
+            `;
+            
+            // Calculate time spent
+            const timeSpent = Math.round((new Date() - quizStartTime) / 1000);
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+            document.getElementById('timeSpent').textContent = `${minutes} นาที ${seconds} วินาที`;
+            
+            // Hide quiz container and show results
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+        }
+
+        // Timer function
+        function startTimer() {
+            quizStartTime = new Date();
+            timerInterval = setInterval(() => {
+                const timeSpent = Math.round((new Date() - quizStartTime) / 1000);
+                const minutes = Math.floor(timeSpent / 60);
+                const seconds = timeSpent % 60;
+                timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    </script>
+    
+    <!-- Footer Credit -->
+    <div class="text-center text-gray-500 text-xs py-2">
+        Made with ❤️ by PetchMANNO1
+    </div>
+</body>
+</html>
